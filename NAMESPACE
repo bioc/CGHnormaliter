@@ -1,0 +1,7 @@
+exportPattern("^[^\\.]")
+importMethodsFrom(Biobase, featureData, featureNames, sampleNames)
+importMethodsFrom(CGHbase, copynumber)
+importFrom(CGHcall, CGHcall, preprocess, segmentData)
+importFrom(methods, "@<-", new)
+importFrom(stats, loess, predict)
+importFrom(utils, write.table)

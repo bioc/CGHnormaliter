@@ -1,0 +1,105 @@
+% \VignetteIndexEntry{CGH normaliter package}
+%\VignettePackage{CGHnormaliter}
+
+
+\documentclass{article}
+
+\bibliographystyle{plain}
+
+\begin{document}
+
+
+<<foo,include=FALSE,echo=FALSE>>=
+options(keep.source = TRUE, width = 60)
+foo <- packageDescription("CGHnormaliter")
+@ 
+
+\title{CGHnormaliter Package (Version \Sexpr{foo$Version})} 
+
+\author{Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling}
+\maketitle 
+
+\section{Introduction}
+This package contains an implementation of the CGHnormaliter strategy for improved normalization of dual-channel array Comparative Genomic Hybridization (aCGH) data displaying many copy number imbalances. The key idea of our method is that temporary exclusion of aberrations from the data allows for a more appropriate calculation of the LOWESS regression curve. As a result, after normalization, the log$_2$ intensity ratios of the normals will generally be closer to zero and better reflect the biological reality. We coin this normalization strategy `local-LOWESS' since only a subset of the log$_2$ ratios is considered in the LOWESS regression.
+
+The  strategy can be summarized as follows. Initially the log$_{2}$ intensity ratios are segmented using DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals from gains and losses. These normals are subsequently used for normalization based on LOWESS. These steps are then iterated to refine the normalization. An overview is given in Figure~\ref{fig:overview}. For more detailed information we refer to the publication of our method~\cite{vanhoute2009}.
+
+\begin{figure}
+\setlength{\unitlength}{1cm}
+\begin{center}
+\begin{picture}(8.5,4.6)(0,0)
+\put(0,1.5){\resizebox{6cm}{!}{\includegraphics{CGHnormaliter-overview}}}
+\end{picture}
+\caption{Overview of the CGHnormaliter method.\label{fig:overview}}
+\end{center}
+\end{figure}
+
+\section{Data format}
+The input should be either a \begin{tt}data.frame\end{tt} or the file name of a tabseparated text file (text files must contain a header). The first four columns should describe the clone and its position on the genome:
+\begin{enumerate}
+    \item ID : The unique identifiers of array elements.
+    \item Chromosome : Chromosome number of each array element.
+    \item Start : Chromosomal start position in bp of each array element.
+    \item End : Chromosomal end position in bp of each array element.
+\end{enumerate}
+The start and end positions must be numeric. The next columns hold the actual data. For each sample in the experiment, there must be two adjacent columns with the \emph{reference} and \emph{test} intensities, respectively. All entries must be delimited by tabs, and missing entries must be denoted with \textit{NA} or by an empty value. Below, an example is given of a correctly formatted data file or data.frame containing measurements on 7 clones in 2 samples.
+
+\begin{footnotesize}
+\begin{verbatim}
+ID           Chromosome  Start   End     Case1.Ref  Case1.Test  Case2.Ref  Case2.Test
+RP11-34P13   1           1       254479  279        294         NA         NA
+RP11-379K15  1           95421   244136  1815       2269        2793       3996
+RP11-776O18  1           357737  465038  387        349         429        362
+RP11-45C18   1           579118  696613  786        734         900        735
+RP11-242B5   1           606617  711982  2955       4158        4478       5229
+RP13-586C17  1           619355  783174  NA         NA          823        841
+RP11-414L23  1           658751  846904  630        937         959        744
+\end{verbatim}
+\end{footnotesize}
+
+\section{Example}
+First, we load the example Leukemia dataset~\cite{paulsson2006} which is contained in the CGHnormaliter package:
+<<loaddata>>=
+library(CGHnormaliter)
+data(Leukemia)
+@
+
+\vspace{0.5cm}
+\noindent Next, we run the CGHnormaliter routine on the first three chromosomes of the Leukemia data, with a maximum of 3 iterations:
+<<runnormaliter,echo=TRUE,quiet=TRUE>>=
+result <- CGHnormaliter(Leukemia, nchrom=3)
+@ 
+
+\vspace{0.5cm}
+\noindent Now we can access several fields of the \begin{tt}result\end{tt} object, for example:
+<<acceess>>=
+normalized.data <- copynumber(result)
+segmented.data <- segmented(result)
+called.data <- calls(result)
+@
+
+\vspace{0.5cm}
+\noindent To visualize the results per sample, the \begin{tt}plot\end{tt} function of the \begin{tt}CGHcall\end{tt} package can be used. In Figure~\ref{fig:plot} we plot the results for the second sample:
+<<label=fig1plot,include=FALSE>>=
+plot(result[,2])
+@
+\begin{figure}
+\begin{center}
+<<label=fig1,fig=TRUE,echo=FALSE>>=
+<<fig1plot>>
+@
+\end{center}
+\caption{Results of the CGHnormaliter normalization for the second Leukemia sample.}
+\label{fig:plot}
+\end{figure}
+
+\vspace{0.5cm}
+\noindent Finally, the package provides the function \begin{tt}CGHnormaliter.write.table\end{tt} to save the normalized data into a tabdelimited plain text file:
+<<save>>=
+CGHnormaliter.write.table(result)
+@
+
+\bibliography{CGHnormaliter}
+
+\end{document}
+

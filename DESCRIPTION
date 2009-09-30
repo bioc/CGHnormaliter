@@ -1,0 +1,12 @@
+Package: CGHnormaliter
+Type: Package
+Title: CGHnormaliter is a strategy for improved normalization of aCGH data.
+Version: 0.99.0
+Date: 2009-09-22
+Author: Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling 
+Maintainer: Bart P.P. van Houte <bvhoute@few.vu.nl>
+Depends: CGHcall (>= 2.2.0), CGHbase (>= 1.2.0)
+Imports: Biobase, CGHbase, CGHcall, methods, stats, utils
+Description: CGHnormaliter is an iterative algorithm for normalization of aCGH data displaying imbalanced aberrations. First, provisory balanced copy numbers are identified and subsequently used for normalization based on LOWESS. These two steps are then iterated to refine the normalization. The assumption here is that the temporary exclusion of aberrations allows for a more appropriate calculation of the LOWESS regression curve. As a result, after normalization, the log2 intensity ratios of the normals will generally be closer to zero and better reflect the biological reality.
+License: GPL (>= 3)
+biocViews: Microarray, DNACopyNumber, Preprocessing
