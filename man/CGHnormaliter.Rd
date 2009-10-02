@@ -21,7 +21,7 @@
 }
 
 \details{
-  The input should be either a \code{data.frame} or the file name of a tabseparated text file (text files must contain a header). The first four columns should contain the name, chromosome and the start and end position in bp for each array target respectively. The position columns must contain numbers only. Following these are two columns with the raw reference and test intensities for each of your samples. These intensities must be numeric as well. If the input type is a text file, missing values should be represented as 'NA' or an empty field. There is a \code{CGHnormaliter.write.table} method that prints the results in a tabular format.
+  The input should be either a \code{data.frame} or the file name of a tabseparated text file (text files must contain a header). The first four columns should contain the name, chromosome and the start and end position in bp for each array target respectively. The position columns must contain numbers only. Following these are two columns with the raw test and reference intensities for each of your samples. These intensities must be numeric as well. If the input type is a text file, missing values should be represented as 'NA' or an empty field. There is a \code{CGHnormaliter.write.table} method that prints the results in a tabular format.
 }
 
 \value{
