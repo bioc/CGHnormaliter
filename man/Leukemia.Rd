@@ -19,12 +19,12 @@
     \item{Chromosome}{Chromosome number of each array element.}
     \item{Start}{Chromosomal start position in bp of each array element.}
     \item{End}{Chromosomal end position in bp of each array element.}
-    \item{Case1\_cy5}{Background corrected Cy5 intensity values for sample 1.}
-    \item{Case1\_cy3}{Background corrected Cy3 intensity values for sample 1.}
-    \item{Case2\_cy5}{Background corrected Cy5 intensity values for sample 2.}
-    \item{Case2\_cy3}{Background corrected Cy3 intensity values for sample 2.}
-    \item{Case3\_cy5}{Background corrected Cy5 intensity values for sample 3.}
-    \item{Case3\_cy3}{Background corrected Cy3 intensity values for sample 3.}
+    \item{Case1.test}{Background corrected test intensity values for sample 1.}
+    \item{Case1.ref}{Background corrected reference intensity values for sample 1.}
+    \item{Case2.test}{Background corrected test intensity values for sample 2.}
+    \item{Case2.ref}{Background corrected reference intensity values for sample 2.}
+    \item{Case3.test}{Background corrected test intensity values for sample 3.}
+    \item{Case3.ref}{Background corrected reference intensity values for sample 3.}
   }
 }
 

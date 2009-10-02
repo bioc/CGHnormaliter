@@ -1,4 +1,4 @@
-CloneID	Chromosome	Start	End	Case1.Ref	Case1.Test	Case2.Ref	Case2.Test	Case3.Ref	Case3.Test
+CloneID	Chromosome	Start	End	Case1.test	Case1.ref	Case2.test	Case2.ref	Case3.test	Case3.ref
 RP11-34P13	1	1	254479	279	294	NA	NA	541	390
 RP11-379K15	1	95421	244136	1815	2269	2793	3996	1529	1167
 RP11-776O18	1	357737	465038	387	349	429	362	696	340

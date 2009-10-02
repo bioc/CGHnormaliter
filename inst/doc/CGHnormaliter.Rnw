@@ -39,11 +39,11 @@ The input should be either a \begin{tt}data.frame\end{tt} or the file name of a 
     \item Start : Chromosomal start position in bp of each array element.
     \item End : Chromosomal end position in bp of each array element.
 \end{enumerate}
-The start and end positions must be numeric. The next columns hold the actual data. For each sample in the experiment, there must be two adjacent columns with the \emph{reference} and \emph{test} intensities, respectively. All entries must be delimited by tabs, and missing entries must be denoted with \textit{NA} or by an empty value. Below, an example is given of a correctly formatted data file or data.frame containing measurements on 7 clones in 2 samples.
+The start and end positions must be numeric. The next columns hold the actual data. For each sample in the experiment, there must be two adjacent columns with the \emph{test} and \emph{reference} intensities, respectively. All entries must be delimited by tabs, and missing entries must be denoted with \textit{NA} or by an empty value. Below, an example is given of a correctly formatted data file or data.frame containing measurements on 7 clones in 2 samples.
 
 \begin{footnotesize}
 \begin{verbatim}
-ID           Chromosome  Start   End     Case1.Ref  Case1.Test  Case2.Ref  Case2.Test
+ID           Chromosome  Start   End     Case1.test  Case1.ref  Case2.test  Case2.ref
 RP11-34P13   1           1       254479  279        294         NA         NA
 RP11-379K15  1           95421   244136  1815       2269        2793       3996
 RP11-776O18  1           357737  465038  387        349         429        362
