@@ -25,11 +25,8 @@ This package contains an implementation of the CGHnormaliter strategy for improv
 The  strategy can be summarized as follows. Initially the log$_{2}$ intensity ratios are segmented using DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals from gains and losses. These normals are subsequently used for normalization based on LOWESS. These steps are then iterated to refine the normalization. An overview is given in Figure~\ref{fig:overview}. For more detailed information we refer to the publication of our method~\cite{vanhoute2009}.
 
 \begin{figure}
-\setlength{\unitlength}{1cm}
 \begin{center}
-\begin{picture}(8.5,4.6)(0,0)
-\put(0,1.5){\resizebox{6cm}{!}{\includegraphics{CGHnormaliter-overview}}}
-\end{picture}
+\resizebox{6cm}{!}{\includegraphics{CGHnormaliter-overview}}
 \caption{Overview of the CGHnormaliter method.\label{fig:overview}}
 \end{center}
 \end{figure}
