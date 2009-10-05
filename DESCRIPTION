@@ -1,8 +1,8 @@
 Package: CGHnormaliter
 Type: Package
-Title: CGHnormaliter is a strategy for improved normalization of aCGH data.
+Title: Normalization of array CGH data with imbalanced aberrations.
 Version: 0.99.0
-Date: 2009-09-22
+Date: 2009-10-05
 Author: Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling 
 Maintainer: Bart P.P. van Houte <bvhoute@few.vu.nl>
 Depends: CGHcall (>= 2.2.0), CGHbase (>= 1.2.0)
