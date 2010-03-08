@@ -86,7 +86,7 @@ function (data.raw, stop_threshold, max_iterations) {
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
     data.seg <- segmentData(data.raw$M)
     cat("Start data calling ...\n")
-    invisible(capture.output(data.call <- CGHcall(data.seg)))
+    invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
 
     # Perform the iteration
     iteration <- 1
@@ -118,7 +118,7 @@ function (data.raw, stop_threshold, max_iterations) {
         # Segment new data again and repeat the calling procedure
         data.seg <- segmentData(normalized$data)
         cat("Start data calling ...\n")
-        invisible(capture.output(data.call <- CGHcall(data.seg)))
+        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
 
         # If the abortion criterion is reached, leave the iteration
         if (convergence || iteration >= max_iterations) {
