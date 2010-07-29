@@ -6,7 +6,7 @@ function (data, nchrom=24, stop_threshold=0.01, max_iterations=5) {
 
     # Convert into log2 ratios (M) and average intensities (A)
     data.ma <- .cghRaw_ma(data.prep)
-    
+
     # Perform the iteration
     result <- .iterate_normalize_call(data.ma, stop_threshold, max_iterations)
     

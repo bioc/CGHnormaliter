@@ -82,8 +82,9 @@ function (cghRaw_obj) {
 
 .iterate_normalize_call <-
 function (data.raw, stop_threshold, max_iterations) {
-    # Perform a first segmentation and calling
+    # Perform a first normalization, segmentation and calling
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
+    invisible(capture.output(data.raw$M <- normalize(data.raw$M)))
     data.seg <- segmentData(data.raw$M)
     cat("Start data calling ...\n")
     invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
