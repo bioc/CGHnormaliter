@@ -99,7 +99,7 @@ function (data.raw, stop_threshold, max_iterations) {
         normalized <- .local_lowess(data.call, data.raw$A, data.normals)
         
         # Print the mean normalization shift per sample
-        cat("CGHnormaliter -- Mean normalization shift per sample:\n")
+        cat("Mean normalization shift per sample:\n")
         samples <- sampleNames(data.raw$M)
         for (i in 1:length(normalized$shift)) {
             cat("  ", samples[i], ":", normalized$shift[i], "\n")

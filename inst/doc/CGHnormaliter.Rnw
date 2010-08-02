@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{CGH normaliter package}
+%\VignetteIndexEntry{CGHnormaliter}
 %\VignettePackage{CGHnormaliter}
 
 
@@ -9,24 +9,25 @@
 \begin{document}
 
 
-<<foo,include=FALSE,echo=FALSE>>=
-options(keep.source = TRUE, width = 60)
-foo <- packageDescription("CGHnormaliter")
+<<CGHnormaliterPackage, include=FALSE, echo=FALSE>>=
+options(keep.source=TRUE, width=60)
+CGHnormaliterPackage <- packageDescription("CGHnormaliter")
 @ 
 
-\title{CGHnormaliter Package (Version \Sexpr{foo$Version})} 
+\title{CGHnormaliter Package (Version \Sexpr{CGHnormaliterPackage$Version})} 
 
 \author{Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling}
 \maketitle 
 
 \section{Introduction}
-This package contains an implementation of the CGHnormaliter strategy for improved normalization of dual-channel array Comparative Genomic Hybridization (aCGH) data displaying many copy number imbalances. The key idea of our method is that temporary exclusion of aberrations from the data allows for a more appropriate calculation of the LOWESS regression curve. As a result, after normalization, the log$_2$ intensity ratios of the normals will generally be closer to zero and better reflect the biological reality. We coin this normalization strategy `local-LOWESS' since only a subset of the log$_2$ ratios is considered in the LOWESS regression.
+This package contains an implementation of the CGHnormaliter strategy for normalization of two-channel array Comparative Genomic Hybridization (aCGH) data
+displaying many copy number imbalances. The key idea of our method is that temporary exclusion of aberrations from the aCGH data allows for a more appropriate calculation of the LOWESS regression curve. As a result, after normalization, the log$_2$ intensity ratios of the normals will generally be closer to zero and better reflect the biological reality. We coin this normalization strategy `local-LOWESS' since only a subset of the log$_2$ ratios is considered in the LOWESS regression.
 
-The strategy can be summarized as follows. Initially the log$_{2}$ intensity ratios are segmented using DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals from gains and losses. These normals are subsequently used for normalization based on LOWESS. These steps are then iterated to refine the normalization. An overview is given in Figure~\ref{fig:overview}. For more detailed information we refer to the publications of the method~\cite{vanhoute2009,vanhoute2010}.
+The strategy can be summarized as follows (see Figure~\ref{fig:overview}). Initially the log$_{2}$ intensity ratios are segmented using DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals from gains and losses. These normals are subsequently used for normalization based on LOWESS. These steps are then iterated to refine the normalization. For more detailed information we refer to the publications of the method~\cite{vanhoute2009,vanhoute2010}.
 
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
-\resizebox{6cm}{!}{\includegraphics{CGHnormaliter-overview}}
+\resizebox{6.6cm}{!}{\includegraphics{CGHnormaliter-overview}}
 \caption{Overview of the CGHnormaliter method.\label{fig:overview}}
 \end{center}
 \end{figure}
@@ -62,37 +63,38 @@ data(Leukemia)
 @
 
 \vspace{0.5cm}
-\noindent Next, we run the CGHnormaliter routine on the first three chromosomes of the Leukemia data, with a maximum of 3 iterations:
-<<runnormaliter,echo=TRUE,quiet=TRUE>>=
+\noindent Next, we run the CGHnormaliter routine on the first three chromosomes of the Leukemia data:
+<<runCGHnormaliter, echo=TRUE, quiet=TRUE>>=
 result <- CGHnormaliter(Leukemia, nchrom=3)
 @ 
 
 \vspace{0.5cm}
 \noindent Now we can access several fields of the \begin{tt}result\end{tt} object, for example:
-<<acceess>>=
+<<accessresults>>=
 normalized.data <- copynumber(result)
 segmented.data <- segmented(result)
 called.data <- calls(result)
 @
 
 \vspace{0.5cm}
-\noindent To visualize the results per sample, the \begin{tt}plot\end{tt} function of the \begin{tt}CGHcall\end{tt} package can be used. In Figure~\ref{fig:plot} we plot the results for the second sample:
-<<label=fig1plot,include=FALSE>>=
-plot(result[,2])
+\noindent To visualize the results per sample, the \begin{tt}plot\end{tt} function of the \begin{tt}CGHcall\end{tt} package can be used. In Figure~\ref{fig:plot} we plot the results for the second sample in full resolution:
+<<label=plotcommand, include=FALSE>>=
+plot(result[,2], ylimit=c(-2,2), dotres=1)
 @
-\begin{figure}
+
+\begin{figure}[h]
 \begin{center}
-<<label=fig1,fig=TRUE,echo=FALSE>>=
-<<fig1plot>>
+<<label=fig1, fig=TRUE, echo=FALSE, results=HIDE>>=
+<<plotcommand>>
 @
 \end{center}
+\vspace*{-1.4cm}
 \caption{Results of the CGHnormaliter normalization for the second Leukemia sample.}
 \label{fig:plot}
 \end{figure}
 
-\vspace{0.5cm}
 \noindent Finally, the package provides the function \begin{tt}CGHnormaliter.write.table\end{tt} to save the normalized data into a tabdelimited plain text file:
-<<save>>=
+<<savedata>>=
 CGHnormaliter.write.table(result)
 @
 
