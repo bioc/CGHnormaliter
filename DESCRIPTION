@@ -1,8 +1,8 @@
 Package: CGHnormaliter
 Type: Package
 Title: Normalization of array CGH data with imbalanced aberrations.
-Version: 1.3.2
-Date: 2010-08-06
+Version: 1.3.3
+Date: 2010-08-11
 Author: Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling 
 Maintainer: Bart P.P. van Houte <bvhoute@few.vu.nl>
 Depends: CGHcall (>= 2.2.0), CGHbase (>= 1.2.0)
