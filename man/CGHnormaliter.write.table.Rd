@@ -20,9 +20,9 @@
 \details{
   Available aCGH data types are:
   \itemize{
-    \item \dQuote{normalized}: The normalized log2 intensity ratios
-    \item \dQuote{segmented}: The segmented log2 intensity ratios (after normalization)
-    \item \dQuote{called}: The calls (after normalization)
+    \item normalized: The normalized log2 intensity ratios
+    \item segmented: The segmented log2 intensity ratios (after normalization)
+    \item called: The calls (after normalization)
   }
   The selected data are stored into a tabseparated file with the specified file name.
 }
