@@ -1,23 +1,30 @@
 \name{CGHnormaliter.write.table}
 \alias{CGHnormaliter.write.table}
 
-\title{Print normalized data to a file}
+\title{Print normalized aCGH data to a file}
 
 \description{
   This function stores the results of a CGHnormaliter normalization into a plain text file.
 }
 
 \usage{
-  CGHnormaliter.write.table(result, file="normalized.txt")
+  CGHnormaliter.write.table(input, type="normalized", file=paste(type,".txt", sep=""))
 }
 
 \arguments{
-  \item{result}{Result object of a CGHnormaliter normalization.}
-  \item{file}{Filename to store the data in.}
+  \item{input}{Result object of a CGHnormaliter normalization.}
+  \item{type}{Type of aCGH data to store.}
+  \item{file}{File name to store the data in.}
 }
 
 \details{
-  This function prints the normalized log2 intensity ratios to a tabseparated file with the specified file name. 
+  Available aCGH data types are:
+  \itemize{
+    \item \dQuote{normalized}: The normalized log2 intensity ratios
+    \item \dQuote{segmented}: The segmented log2 intensity ratios (after normalization)
+    \item \dQuote{called}: The calls (after normalization)
+  }
+  The selected data are stored into a tabseparated file with the specified file name.
 }
 
 \author{
@@ -37,7 +44,9 @@
   ## Normalize the intensity ratios
   \dontrun{result <- CGHnormaliter(Leukemia)}
   ## Write the result to a file
-  \dontrun{CGHnormaliter.write.table(result, "normalization_results.txt")}
+  \dontrun{CGHnormaliter.write.table(result)}
+  \dontrun{CGHnormaliter.write.table(result, type="segmented")}
+  \dontrun{CGHnormaliter.write.table(result, type="called", file="mycalls.txt")}
 }
   
 \keyword{IO}

@@ -3,7 +3,7 @@
 \docType{package}
 
 \title{
-  This package implements the CGHnormaliter algorithm which is a strategy for improved normalization of array Comparative Genomic Hybridization (aCGH) data.
+  This package implements the CGHnormaliter algorithm which is a strategy for improved normalization of array Comparative Genomic Hybridization (aCGH) data
 }
 
 \description{

@@ -3,7 +3,7 @@
 \alias{Leukemia}
 
 \title{
-  Array CGH experiment data on childhood acute lymphoblastic leukemia (ALL) in humans.
+  Array CGH experiment data on childhood acute lymphoblastic leukemia (ALL) in humans
 }
 
 \description{

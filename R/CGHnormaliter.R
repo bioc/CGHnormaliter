@@ -16,12 +16,31 @@ function (data, nchrom=24, stop_threshold=0.01, max_iterations=5) {
 }
 
 CGHnormaliter.write.table <-
-function (result, file="normalized.txt") {
-    fd <- featureData(result)
-    copynumbers <- copynumber(result)
-    rownames(copynumbers) <- NULL
-    normalized <- data.frame(probeID=featureNames(fd), Chromosome=fd$Chromosome,
-                             Start=fd$Start, End=fd$End, copynumbers)
-    cat("Saving normalized log2 ratios to file:", file, "\n")
-    write.table(file=file, normalized, sep="\t", quote=F, row.names=F)
+function (input, type="normalized", file=paste(type,".txt", sep="")) {
+    # First do a type check
+    if (class(input) != "cghCall") {
+        stop("Input should be an object of type cghCall.")
+    }
+
+    # Obtain wanted data from input
+    if (type == "normalized") {
+        data <- copynumber(input)
+        data.string <- "normalized log2 ratios"
+    } else if (type == "segmented") {
+        data <- segmented(input)
+        data.string <- "segmented log2 ratios"
+    } else if (type == "called") {
+        data <- calls(input)
+        data.string <- "calls"
+    } else {
+        stop("Input type \"", type,"\" not implemented.")
+    }
+    
+    # Rebuild data frame and write data to file
+    rownames(data) <- NULL
+    fd <- featureData(input)
+    data <- data.frame(probeID=featureNames(fd), Chromosome=fd$Chromosome,
+                       Start=fd$Start, End=fd$End, data)
+    cat("Saving", data.string, "to file:", file, "\n")
+    write.table(file=file, data, sep="\t", quote=F, row.names=F)
 }
