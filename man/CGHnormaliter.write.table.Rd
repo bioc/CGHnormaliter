@@ -8,12 +8,12 @@
 }
 
 \usage{
-  CGHnormaliter.write.table(input, type="normalized", file=paste(type,".txt", sep=""))
+  CGHnormaliter.write.table(input, data.type=c("normalized","segmented","called"), file=paste(data.type,".txt", sep=""))
 }
 
 \arguments{
   \item{input}{Result object of a CGHnormaliter normalization.}
-  \item{type}{Type of aCGH data to store.}
+  \item{data.type}{Type of aCGH data to store.}
   \item{file}{File name to store the data in.}
 }
 

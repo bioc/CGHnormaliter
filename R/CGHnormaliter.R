@@ -16,24 +16,24 @@ function (data, nchrom=24, stop_threshold=0.01, max_iterations=5) {
 }
 
 CGHnormaliter.write.table <-
-function (input, type="normalized", file=paste(type,".txt", sep="")) {
+function (input, data.type=c("normalized","segmented","called"),
+                           file=paste(data.type,".txt", sep="")) {
     # First do a type check
     if (class(input) != "cghCall") {
         stop("Input should be an object of type cghCall.")
     }
-
+    
     # Obtain wanted data from input
-    if (type == "normalized") {
+    data.type <- match.arg(data.type)
+    if (data.type == "normalized") {
         data <- copynumber(input)
         data.string <- "normalized log2 ratios"
-    } else if (type == "segmented") {
+    } else if (data.type == "segmented") {
         data <- segmented(input)
         data.string <- "segmented log2 ratios"
-    } else if (type == "called") {
+    } else if (data.type == "called") {
         data <- calls(input)
         data.string <- "calls"
-    } else {
-        stop("Input type \"", type,"\" not implemented.")
     }
     
     # Rebuild data frame and write data to file
