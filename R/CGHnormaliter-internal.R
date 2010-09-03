@@ -270,14 +270,14 @@ function (A, M.before, cghCall.after) {
         # MA-plot before normalization
         plot(A[,i], M.before[,i], ylim=ylim, xlab="A", ylab="M", pch='.', col="black")
         title(paste(sampleNames(cghCall.after)[i], "- Before normalization"), line=0.6)
-        abline(h=0, col="gray", lty="dashed")
+        abline(h=0, col="orange", lty="dashed")
 		    
         # MA-plot after normalization
         plot(A[,i], M.after[,i], ylim=ylim, xlab="A", ylab="M", pch='.', col=calls[,i]+2)
         title(paste(sampleNames(cghCall.after)[i], "- After normalization"), line=0.6)
         location = ifelse(ylim[2] + ylim[1] > -0.4, "topright", "bottomright")
         legend(location, legend=legend, col=c(3,2,1), pch=20, cex=0.8, inset=0.02) 
-        abline(h=0, col="gray", lty="dashed")
+        abline(h=0, col="orange", lty="dashed")
     }
     dev.off()
 }
