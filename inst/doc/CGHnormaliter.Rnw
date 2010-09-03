@@ -10,7 +10,7 @@
 
 
 <<CGHnormaliterPackage, include=FALSE, echo=FALSE>>=
-options(keep.source=TRUE, width=60)
+options(keep.source=TRUE)
 CGHnormaliterPackage <- packageDescription("CGHnormaliter")
 @ 
 
@@ -20,27 +20,49 @@ CGHnormaliterPackage <- packageDescription("CGHnormaliter")
 \maketitle 
 
 \section{Introduction}
-This package contains an implementation of the CGHnormaliter strategy for normalization of two-channel array Comparative Genomic Hybridization (aCGH) data
-displaying many copy number imbalances. The key idea of our method is that temporary exclusion of aberrations from the aCGH data allows for a more appropriate calculation of the LOWESS regression curve. As a result, after normalization, the log$_2$ intensity ratios of the normals will generally be closer to zero and better reflect the biological reality. We coin this normalization strategy `local-LOWESS' since only a subset of the log$_2$ ratios is considered in the LOWESS regression.
+This package contains an implementation of the CGHnormaliter strategy for
+normalization of two-channel array Comparative Genomic Hybridization (aCGH)
+data displaying many copy number imbalances. The key idea of our method is
+that temporary exclusion of aberrations from the aCGH data allows for a more
+appropriate calculation of the LOWESS regression curve. As a result, after
+normalization, the log$_2$ intensity ratios of the normals will generally
+be closer to zero and better reflect the biological reality. We coined this
+normalization strategy `local-LOWESS' since only a subset of the log$_2$
+ratios is considered in the LOWESS regression.
 
-The strategy can be summarized as follows (see Figure~\ref{fig:overview}). Initially the log$_{2}$ intensity ratios are segmented using DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals from gains and losses. These normals are subsequently used for normalization based on LOWESS. These steps are then iterated to refine the normalization. For more detailed information we refer to the publications of the method~\cite{vanhoute2009,vanhoute2010}.
+The strategy can be summarized as follows (see Figure~\ref{fig:method}).
+Initially the log$_{2}$ intensity ratios are segmented using
+DNAcopy~\cite{venkatraman2007}. The segmented data are then given as input
+to a calling tool named CGHcall~\cite{wiel2007} to discriminate the normals
+from gains and losses. These normals are subsequently used for normalization
+based on LOWESS. These steps are then iterated to refine the normalization.
+For more detailed information we refer to the publications of the
+method~\cite{vanhoute2009,vanhoute2010}.
 
 \begin{figure}[h]
 \begin{center}
-\resizebox{6.6cm}{!}{\includegraphics{CGHnormaliter-overview}}
-\caption{Overview of the CGHnormaliter method.\label{fig:overview}}
+\resizebox{6.6cm}{!}{\includegraphics{CGHnormaliter-method}}
+\caption{Overview of the CGHnormaliter method.\label{fig:method}}
 \end{center}
 \end{figure}
 
 \section{Data format}
-The input should be either a \begin{tt}data.frame\end{tt} or the file name of a tabseparated text file (text files must contain a header). The first four columns should describe the clone and its position on the genome:
+The input should be either a \begin{tt}data.frame\end{tt} or the file name
+of a tabseparated text file (text files must contain a header). The first
+four columns should describe the clone and its position on the genome:
 \begin{enumerate}
     \item ID : The unique identifiers of array elements.
     \item Chromosome : Chromosome number of each array element.
     \item Start : Chromosomal start position in bp of each array element.
     \item End : Chromosomal end position in bp of each array element.
 \end{enumerate}
-The start and end positions must be numeric. The next columns hold the actual data. For each sample in the experiment, there must be two adjacent columns with the \emph{test} and \emph{reference} intensities, respectively. All entries must be delimited by tabs, and missing entries must be denoted with \textit{NA} or by an empty value. Below, an example is given of a correctly formatted data file or data.frame containing measurements on 7 clones in 2 samples.
+The start and end positions must be numeric. The next columns hold the
+actual data. For each sample in the experiment, there must be two adjacent
+columns with the \emph{test} and \emph{reference} intensities, respectively.
+All entries must be delimited by tabs, and missing entries must be denoted
+with \textit{NA} or by an empty value. Below, an example is given of a
+correctly formatted data file or data.frame containing measurements on 7
+clones in 2 samples.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -55,47 +77,89 @@ RP11-414L23  1           658751  846904  630        937         959        744
 \end{verbatim}
 \end{footnotesize}
 
+
 \section{Example}
-First, we load the example Leukemia dataset~\cite{paulsson2006} which is contained in the CGHnormaliter package:
-<<loaddata>>=
+First, we load the example acute lymphoblastic leukemia
+dataset~\cite{paulsson2006} which comes with the CGHnormaliter package:
+<<loadData>>=
 library(CGHnormaliter)
 data(Leukemia)
 @
 
 \vspace{0.5cm}
-\noindent Next, we run the CGHnormaliter routine on the first three chromosomes of the Leukemia data:
-<<runCGHnormaliter, echo=TRUE, quiet=TRUE>>=
+\noindent Next, we run the CGHnormaliter routine on the first three
+chromosomes of the \begin{tt}Leukemia\end{tt} data:
+<<label=removeMAplot, echo=FALSE, results=HIDE>>=
+unlink("MAplot.pdf")
+<<runCGHnormaliter>>=
 result <- CGHnormaliter(Leukemia, nchrom=3)
-@ 
+@
 
 \vspace{0.5cm}
-\noindent Now we can access several fields of the \begin{tt}result\end{tt} object, for example:
-<<accessresults>>=
+\noindent To enable a visual assessment of the bias reduction, MA-plots are
+(by default) automatically generated before and after normalization of each
+sample. These plots are stored into a PDF, usually named
+\begin{tt}MAplot.pdf\end{tt} (the exact file name is supplied at the end of
+each CGHnormaliter run). See Figure~\ref{fig:ma-plot} for such MA-plots of
+the second \begin{tt}Leukemia\end{tt} sample.
+
+\begin{figure}
+\begin{center}
+\resizebox{12.8cm}{!}{\includegraphics[page=2]{MAplot}}
+\end{center}
+\caption{MA-plot for the second leukemia sample before and after
+normalization. Note that the normalization is based on the normals only
+(represented by black dots in the bottom figure).}
+\label{fig:ma-plot}
+\end{figure}
+
+\vspace{0.5cm}
+\noindent Now, several fields of the \begin{tt}result\end{tt} object can be
+acccessed, for example:
+<<accessResults>>=
 normalized.data <- copynumber(result)
 segmented.data <- segmented(result)
 called.data <- calls(result)
 @
 
 \vspace{0.5cm}
-\noindent To visualize the results per sample, the \begin{tt}plot\end{tt} function of the \begin{tt}CGHcall\end{tt} package can be used. In Figure~\ref{fig:plot} we plot the results for the second sample in full resolution:
-<<label=plotcommand, include=FALSE>>=
+The results can be visualized using the \begin{tt}plot\end{tt} function.
+In Figure~\ref{fig:calls-plot} we plot the results for the second sample
+in full resolution:
+<<label=plotCommand, term=FALSE>>=
 plot(result[,2], ylimit=c(-2,2), dotres=1)
 @
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
-<<label=fig1, fig=TRUE, echo=FALSE, results=HIDE>>=
-<<plotcommand>>
+<<label=callFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=HIDE>>=
+<<plotCommand>>
 @
 \end{center}
 \vspace*{-1.4cm}
-\caption{Results of the CGHnormaliter normalization for the second Leukemia sample.}
-\label{fig:plot}
+\caption{Results of the CGHnormaliter normalization for the second leukemia
+sample.}
+\label{fig:calls-plot}
 \end{figure}
 
-\noindent Finally, the package provides the function \begin{tt}CGHnormaliter.write.table\end{tt} to save the normalized data into a tabdelimited plain text file:
-<<savedata>>=
+\vspace{0.5cm}
+Finally, the package provides the function
+\begin{tt}CGHnormaliter.write.table\end{tt} to save the normalized data into
+a tabdelimited plain text file:
+<<saveNormalizedData>>=
 CGHnormaliter.write.table(result)
+@
+
+\noindent The segmented and called data from the \begin{tt}result\end{tt}
+object can be saved to file as well using this function:
+
+<<saveOtherData>>=
+CGHnormaliter.write.table(result, data.type="segmented")
+CGHnormaliter.write.table(result, data.type="called")
+@
+
+<<label=removeJunkFiles, echo=FALSE, results=HIDE>>=
+unlink(c("Rplots.pdf", "normalized.txt", "segmented.txt", "called.txt"))
 @
 
 \bibliography{CGHnormaliter}

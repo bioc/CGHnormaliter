@@ -12,9 +12,9 @@
 }
 
 \arguments{
-  \item{input}{Result object of a CGHnormaliter normalization.}
-  \item{data.type}{Type of aCGH data to store.}
-  \item{file}{File name to store the data in.}
+  \item{input}{result object of a CGHnormaliter normalization.}
+  \item{data.type}{type of aCGH data to store.}
+  \item{file}{file name to store the data in.}
 }
 
 \details{

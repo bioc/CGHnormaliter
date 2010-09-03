@@ -10,14 +10,15 @@
 }
 
 \usage{
-  CGHnormaliter(data, nchrom = 24, stop_threshold = 0.01, max_iterations = 5)
+  CGHnormaliter(data, nchrom = 24, stop_threshold = 0.01, max_iterations = 5, plotMA = TRUE)
 }
 
 \arguments{
-  \item{data}{Either a dataframe or character string containing a filename. See section Details for the format.}
-  \item{nchrom}{Number of chromosomes.}
-  \item{stop_threshold}{Threshold value for the mean difference between the LOWESS regression curves from two consecutive iterations. The iteration is terminated if this difference is below the \code{stop_threshold} for all samples.}
-  \item{max_iterations}{Maximum number of iterations.}
+  \item{data}{either a dataframe or character string containing a filename. See section Details for the format.}
+  \item{nchrom}{number of chromosomes.}
+  \item{stop_threshold}{threshold value for the mean difference between the LOWESS regression curves from two consecutive iterations. The iteration is terminated if this difference is below the \code{stop_threshold} for all samples.}
+  \item{max_iterations}{maximum number of iterations.}
+   \item{plotMA}{logical. If \sQuote{plotMA = TRUE}, MA-plots before and after normalization are generated of each sample. The plots are saved into a PDF file.}
 }
 
 \details{
