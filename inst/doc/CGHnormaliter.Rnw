@@ -89,8 +89,6 @@ data(Leukemia)
 \vspace{0.5cm}
 \noindent Next, we run the CGHnormaliter routine on the first three
 chromosomes of the \begin{tt}Leukemia\end{tt} data:
-<<label=removeMAplot, echo=FALSE, results=HIDE>>=
-unlink("MAplot.pdf")
 <<runCGHnormaliter>>=
 result <- CGHnormaliter(Leukemia, nchrom=3)
 @
@@ -156,10 +154,6 @@ object can be saved to file as well using this function:
 <<saveOtherData>>=
 CGHnormaliter.write.table(result, data.type="segmented")
 CGHnormaliter.write.table(result, data.type="called")
-@
-
-<<label=removeJunkFiles, echo=FALSE, results=HIDE>>=
-unlink(c("Rplots.pdf", "normalized.txt", "segmented.txt", "called.txt"))
 @
 
 \bibliography{CGHnormaliter}

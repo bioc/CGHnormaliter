@@ -14,8 +14,8 @@
   \tabular{ll}{
     Package: \tab CGHnormaliter\cr
     Type: \tab Package\cr
-    Version: \tab 1.3.6\cr
-    Date: \tab 2010-09-08\cr
+    Version: \tab 1.3.8\cr
+    Date: \tab 2010-10-11\cr
     License: \tab GPL (>= 3)\cr
   }
   The package contains two public functions. The function \code{CGHnormaliter} performs the iterative normalization of aCGH data, while the function \code{CGHnormaliter.write.table} prints normalized aCGH data to a file. See function documentation for details.

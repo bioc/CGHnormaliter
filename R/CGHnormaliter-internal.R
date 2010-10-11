@@ -87,7 +87,7 @@ function (data.raw, stop_threshold, max_iterations, plotMA) {
     invisible(capture.output(data.nor <- normalize(data.raw$M, smoothOutliers=FALSE)))
     data.seg <- segmentData(data.nor)
     rm(data.nor)
-    cat("Start data calling ...\n")
+    cat("Start data calling ..\n")
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
         invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
         invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
@@ -126,7 +126,7 @@ function (data.raw, stop_threshold, max_iterations, plotMA) {
         
         # Segment new data again and repeat the calling procedure
         data.seg <- segmentData(normalized$data)
-        cat("Start data calling ...\n")
+        cat("Start data calling ..\n")
         if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
             invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
             invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
