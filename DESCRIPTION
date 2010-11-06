@@ -9,4 +9,4 @@ Depends: CGHcall (>= 2.2.0), CGHbase (>= 1.2.0)
 Imports: Biobase, CGHbase, CGHcall, methods, stats, utils
 Description: Normalization of array comparative genomic hybridization (aCGH) data. The algorithm uses an iterative procedure that effectively eliminates the influence of imbalanced copy numbers. This leads to a more reliable assessment of copy number alterations (CNAs).
 License: GPL (>= 3)
-biocViews: Microarray, DNACopyNumber, Preprocessing
+biocViews: Microarray, Preprocessing
