@@ -13,19 +13,18 @@ function (input) {
         stop("The input file must have at least six columns.\n",
              "Please read the documentation for the required format.")
     }
-        
+    
     # Average duplicate clones
     IDfreqs <- table(input[, 1])
     if (any(IDfreqs > 1)) {
         cat("\nAveraging duplicated clones...\n")
         IDfreqs <- IDfreqs[IDfreqs > 1]
-        IDlabels <- names(IDfreqs)
         for (i in 1:length(IDfreqs)) {
-            index <- which(input[, 1] == IDlabels[i])
+            index <- which(input[, 1] == names(IDfreqs[i]))
             duplicates <- as.matrix(input[index, 5:ncol(input)])
             means <- apply(duplicates, 2, mean, na.rm=TRUE)
             input[index[1], 5:ncol(input)] <- means
-            for (j in 2:length(index)) {
+            for (j in length(index):2) {
                    input <- input[-index[j],]
             }
         }
