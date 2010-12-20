@@ -25,7 +25,7 @@ function (input) {
             means <- apply(duplicates, 2, mean, na.rm=TRUE)
             input[index[1], 5:ncol(input)] <- means
             for (j in length(index):2) {
-                   input <- input[-index[j],]
+                input <- input[-index[j],]
             }
         }
     }
