@@ -17,8 +17,11 @@ function (input) {
     # Average duplicate clones
     IDfreqs <- table(input[, 1])
     if (any(IDfreqs > 1)) {
-        cat("\nAveraging duplicated clones...\n")
         IDfreqs <- IDfreqs[IDfreqs > 1]
+        cat("\nAveraging", length(IDfreqs), "duplicated clones...\n")
+	if (length(IDfreqs) > 100) {
+	    cat("\nPlease be patient...\n")
+	}
         for (i in 1:length(IDfreqs)) {
             index <- which(input[, 1] == names(IDfreqs[i]))
             duplicates <- as.matrix(input[index, 5:ncol(input)])
