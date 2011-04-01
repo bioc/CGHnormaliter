@@ -1,6 +1,7 @@
-.cghRaw_read <-
+.readCghRaw <-
 function (input) {
     if (class(input) == "character") {
+        cat("Reading input file...\n")
         input <- read.table(input, header=TRUE, sep="\t", quote="\"", fill=TRUE)
     } else if (class(input) != "data.frame") {
         stop("Input should be either a data.frame or a character string ",
@@ -18,9 +19,9 @@ function (input) {
     IDfreqs <- table(input[, 1])
     if (any(IDfreqs > 1)) {
         IDfreqs <- IDfreqs[IDfreqs > 1]
-        cat("\nAveraging", length(IDfreqs), "duplicated clones...\n")
+        cat("Averaging", length(IDfreqs), "duplicated clones...\n")
 	if (length(IDfreqs) > 100) {
-	    cat("\nPlease be patient...\n")
+	    cat("Please be patient...\n")
 	}
         for (i in 1:length(IDfreqs)) {
             index <- which(input[, 1] == names(IDfreqs[i]))
@@ -28,7 +29,7 @@ function (input) {
             means <- apply(duplicates, 2, mean, na.rm=TRUE)
             input[index[1], 5:ncol(input)] <- means
             for (j in length(index):2) {
-                input <- input[-index[j],]
+                input <- input[-index[j], ]
             }
         }
     }
@@ -40,18 +41,17 @@ function (input) {
                 " `24' (assuming organism=human)",  immediate.=TRUE)
         chromosomes <- replace(chromosomes, chromosomes == 'X', 23)
         chromosomes <- replace(chromosomes, chromosomes == 'Y', 24)
-        input[,2] <- as.integer(as.vector(chromosomes))
+        input[, 2] <- as.integer(as.vector(chromosomes))
     }
-
     cghRaw(input)
 }
 
 
-.cghRaw_ma <-
-function (cghRaw_obj) {
-    intensities <- copynumber(cghRaw_obj)
-    samples <- sampleNames(cghRaw_obj)
-    features <- featureNames(cghRaw_obj)
+.calculateMA <-
+function (raw.data) {
+    intensities <- copynumber(raw.data)
+    samples <- sampleNames(raw.data)
+    features <- featureNames(raw.data)
 
     # Number of intensity columns must be even (ref and test per sample)
     if (ncol(intensities) %% 2 == 1) {
@@ -59,36 +59,88 @@ function (cghRaw_obj) {
     }    
 
     # Initialize matrix for log2 ratios (M) and average spot intensities (A)
-    M <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
-    A <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
-    colnames_M <- c()
-    colnames_A <- c()
+    data.M <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
+    data.A <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
+    colnames.M <- c()
+    colnames.A <- c()
 
     # Calculate M and A
     for (i in seq(1, ncol(intensities), 2)) {
-        test <- intensities[,i]
-        ref <- intensities[,i+1]
-        M <- cbind(M, log2(test / ref))
-        A <- cbind(A, log2(test * ref) / 2)
-        colnames_M <- c(colnames_M, paste(samples[i],"_",samples[i+1], sep=""))
-        colnames_A <- c(colnames_A, paste(samples[i],"_",samples[i+1], sep=""))
+        test <- intensities[, i]
+        ref <- intensities[, i+1]
+        data.M <- cbind(data.M, log2(test / ref))
+        data.A <- cbind(data.A, log2(test * ref) / 2)
+        colnames.M <- c(colnames.M, paste(samples[i], "_", samples[i+1], sep=""))
+        colnames.A <- c(colnames.A, paste(samples[i], "_", samples[i+1], sep=""))
     }
-    colnames(M) <- colnames_M
-    colnames(A) <- colnames_A
+    colnames(data.M) <- colnames.M
+    colnames(data.A) <- colnames.A
 
     # Construct the new cghRaw object, including the average intensities (A)
-    cghRaw_m <- new("cghRaw", copynumber=M, featureData=featureData(cghRaw_obj))
+    data.M <- new("cghRaw", copynumber=data.M, featureData=featureData(raw.data))
     
-    list(M=cghRaw_m, A=A)
+    list(M=data.M, A=data.A)
 }
 
-.iterate_normalize_call <-
-function (data.raw, stop_threshold, max_iterations, plotMA) {
+
+.runCGHnormaliter <-
+function (data.raw, cellularity, max.losses, stop.threshold, max.iterations, plot.MA) {
     # Perform an initial normalization, segmentation and calling
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
-    invisible(capture.output(data.nor <- normalize(data.raw$M, smoothOutliers=FALSE)))
+    invisible(capture.output(data.nor <-
+        normalize(data.raw$M, cellularity=cellularity, smoothOutliers=FALSE)))
     data.seg <- segmentData(data.nor)
     rm(data.nor)
+    data.seg <- postsegnormalize(data.seg)
+    data.call <- .runCGHcall(data.seg)
+    
+    # Perform the iteration
+    iteration <- 1
+    repeat {
+        cat("CGHnormaliter -- Iteration #", iteration, "\n")
+
+        # Identify the normals and (re)normalize based to these normals
+        data.normals <- .extractNormals(data.call, data.raw$A, max.losses)
+        normalized <- .localLowess(data.call, data.raw$A, data.normals)
+    
+        # Print the mean normalization shift per sample
+        cat("Mean normalization shift per sample:\n")
+        samples <- sampleNames(data.raw$M)
+        for (i in 1:length(normalized$shift)) {
+            cat("  ", samples[i], ":", normalized$shift[i], "\n")
+        }
+        
+        # Print message if an abortion criterion is reached
+        convergence <- (sum(normalized$shift < stop.threshold) == length(normalized$shift))
+        if (convergence) {
+            cat("CGHnormaliter -- Reached convergence. ")
+            cat("Running a final segmentation and calling...\n")
+        } else if (iteration >= max.iterations) {
+            cat("CGHnormaliter -- Max iterations (",max.iterations,") reached. ", sep="")
+            cat("Running a final segmentation and calling...\n")
+        }
+        
+        # Segment new data again and repeat the calling procedure
+        data.seg <- segmentData(normalized$data)
+        data.call <- .runCGHcall(data.seg)
+	
+        # If abortion criterion reached, draw MA-plots and leave iteration
+        if (convergence || iteration >= max.iterations) {
+	    rm(data.seg, data.normals, normalized)
+            if (plot.MA) {
+                .plotMA(data.raw$A, copynumber(data.raw$M), data.call)
+            }
+            cat("CGHnormaliter -- FINISHED\n")
+            break
+        }
+        iteration <- iteration + 1
+    }
+    data.call
+}
+
+
+.runCGHcall <-
+function (data.seg) {
     cat("Start data calling ..\n")
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
         invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
@@ -98,162 +150,79 @@ function (data.raw, stop_threshold, max_iterations, plotMA) {
     } else {
         invisible(capture.output(data.call <- CGHcall(data.seg)))
     }
-        
-    # Perform the iteration
-    iteration <- 1
-    repeat {
-        cat("CGHnormaliter -- Iteration #", iteration, "\n")
-
-        # Identify the normals and (re)normalize based to these normals
-        data.normals <- .extract_normals(data.call, data.raw$A)
-        normalized <- .local_lowess(data.call, data.raw$A, data.normals)
-        
-        # Print the mean normalization shift per sample
-        cat("Mean normalization shift per sample:\n")
-        samples <- sampleNames(data.raw$M)
-        for (i in 1:length(normalized$shift)) {
-            cat("  ", samples[i], ":", normalized$shift[i], "\n")
-        }
-        
-        # Print message if a abortion criterion is reached
-        convergence <- (sum(normalized$shift < stop_threshold) == length(normalized$shift))
-        if (convergence) {
-            cat("CGHnormaliter -- Reached convergence. ")
-            cat("Running a final segmentation and calling...\n")
-        }
-        else if (iteration >= max_iterations) {
-            cat("CGHnormaliter -- Max iterations (",max_iterations,") reached. ", sep="")
-            cat("Running a final segmentation and calling...\n")
-        }
-        
-        # Segment new data again and repeat the calling procedure
-        data.seg <- segmentData(normalized$data)
-        cat("Start data calling ..\n")
-        if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-            invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
-            invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
-        } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-            invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
-        } else {
-            invisible(capture.output(data.call <- CGHcall(data.seg)))
-        }	
-	
-        # If abortion criterion reached, draw MA-plots and leave iteration
-        if (convergence || iteration >= max_iterations) {
-	    rm(data.seg, data.normals, normalized)
-            if (plotMA) {
-                .ma_plots(data.raw$A, copynumber(data.raw$M), data.call)
-            }
-            cat("CGHnormaliter -- FINISHED\n")
-            break
-        }
-        iteration <- iteration + 1
-    }
-
-    # Return the normalized data, including segmentation and calling results
     data.call
 }
 
-.extract_normals <-
-function (cghCall_obj, avg_intensities) {
-    # Extract the calls and the copynumbers from the cghCall object
-    calls <- calls(cghCall_obj)
-    copynumbers <- copynumber(cghCall_obj)
+    
+.extractNormals <-
+function (data.call, data.A, max.losses) {
+    calls <- calls(data.call)
+    data.M <- copynumber(data.call)
 
     # A list to store the extracted copy numbers
-    M.normals <- list()
-    A.normals <- list()
+    normals.M <- list()
+    normals.A <- list()
 
-    # A variable to store the processed calls
-    calls.processed <- list()
-
-    # Check if 50% of the calls are normals
-    for (i in 1:ncol(copynumbers)) {
-        # Get the ith call
-        ith_call <- calls[,i]
-
-        # Get the number of losses, normals and gains and calculate
-        # their fractions
-        nr.losses <- length(which(ith_call == -1))
-        nr.normals <- length(which(ith_call == 0))
-        nr.gains <- length(which(ith_call == 1))
-        nr.total <- nrow(copynumbers)
-        
+    # Extract normals in each sample
+    for (i in 1:ncol(data.M)) {
+        nr.losses <- sum(calls[, i] == -1, na.rm=TRUE)
+        nr.total <- nrow(data.call)
         frac.losses <- nr.losses / nr.total
-        frac.normals <- nr.normals / nr.total
-        frac.gains <- nr.gains / nr.total
-
-        # Check if the normals are the majority
-        if (frac.normals < frac.losses || frac.normals < frac.gains) {
-            if (frac.losses > frac.gains) {
-                ith_call <- ith_call + 1  # Make the losses normals
-            }
-            else {
-                ith_call <- ith_call - 1  # Make the gains normals
-            }
+        if (frac.losses <= max.losses) {
+            index.normals <- which(calls[, i] == 0)
+        } else {  # Losses are considered normals
+            index.normals <- which(calls[, i] == -1)
         }
-
-        # Set the new call
-        calls.processed[[i]] <- ith_call
+        normals.M[[i]] <- data.M[, i][index.normals]
+        normals.A[[i]] <- data.A[, i][index.normals]
     }
-
-    # For every sample extract the normals
-    for (i in 1:ncol(copynumbers)) {
-        ith_call <- calls.processed[[i]]
-        M.normals[[i]] <- copynumbers[,i][which(ith_call == 0)]
-        A.normals[[i]] <- avg_intensities[,i][which(ith_call == 0)]
-    }
-
-    # Return the extracted copynumbers that are identified as normals
-    list(M=M.normals, A=A.normals)
+    list(M=normals.M, A=normals.A)
 }
 
-.local_lowess <-
-function (cghCall_obj, avg_intensities, normals) {
-    M.all <- copynumber(cghCall_obj)
-    A.all <- avg_intensities
-    M.normals <- normals$M
-    A.normals <- normals$A
+
+.localLowess <-
+function (data.call, data.A, normals) {
+    data.M <- copynumber(data.call)
     
     # Variable for normalization shift per sample
     shift.mean <- c()
 
-    # Normalize each sample
-    for (i in 1:length(M.normals)) {
+    # Apply LOWESS in each sample
+    for (i in 1:length(normals$M)) {
         # Make sure that the min and max value for A are also included in the
         # LOWESS regression, otherwise predictions for M might lead to NA's
-        A.min <- range(A.all[,i])[1]
-        A.max <- range(A.all[,i])[2]
-        M.min <- M.all[which(A.all == A.min)][1]
-        M.max <- M.all[which(A.all == A.max)][1]
-        A.normals[[i]] <- c(A.normals[[i]], A.min, A.max)
-        M.normals[[i]] <- c(M.normals[[i]], M.min, M.max)
+        min.A <- range(data.A[, i])[1]
+        max.A <- range(data.A[, i])[2]
+        min.M <- data.M[which(data.A == min.A)][1]
+        max.M <- data.M[which(data.A == max.A)][1]
+        normals$A[[i]] <- c(normals$A[[i]], min.A, max.A)
+        normals$M[[i]] <- c(normals$M[[i]], min.M, max.M)
 
         # Apply LOWESS regression based on the normals only
-        regression <- loess(M ~ A, data.frame(A=A.normals[[i]], M=M.normals[[i]]), span=0.2)
+        regression <- loess(M ~ A, data.frame(A=normals$A[[i]], M=normals$M[[i]]), span=0.2)
         
         # Compute the normalization values for the whole sample
-        normalization.values <- predict(regression, data.frame(A=A.all[,i]))
+        normalization.values <- predict(regression, data.frame(A=data.A[, i]))
         shift.mean <- c(shift.mean, mean(abs(normalization.values)))
         
         # Apply the normalization
-        M.all[,i] <- M.all[,i] - normalization.values
+        data.M[, i] <- data.M[, i] - normalization.values
     }
     
     # Create a new environment to store the renormalized data in
-    newAssayData <- new.env(parent=cghCall_obj@assayData)
-    assign("copynumber", M.all, envir=newAssayData)
+    newAssayData <- new.env(parent=data.call@assayData)
+    assign("copynumber", data.M, envir=newAssayData)
 
     # Store the new environment in the return object
-    data.normalized <- cghCall_obj
+    data.normalized <- data.call
     data.normalized@assayData <- newAssayData
 
-    # Return the return object
     list(data=data.normalized, shift=shift.mean)
 }
 
-.ma_plots <-
-function (A, M.before, cghCall.after) {
+
+.plotMA <-
+function (data.A, M.before, cghCall.after) {
      # Find unique filename to store the plot in
     count <- 0
     basename <- "MAplot"
@@ -267,21 +236,21 @@ function (A, M.before, cghCall.after) {
     # Generate plots
     M.after <- copynumber(cghCall.after)
     calls <- calls(cghCall.after)
-    legend <- c("gain","normal","loss")
-    palette(c("red","black","green"))
+    legend <- c("gain", "normal", "loss")
+    palette(c("red", "black", "green"))
     for (i in 1:ncol(M.before)) {
-        par(mfrow=c(2,1))
-        par(mar=c(3.5,3.5,2.5,2))
-        par(mgp=c(2,0.6,0))
+        par(mfrow=c(2, 1))
+        par(mar=c(3.5, 3.5, 2.5, 2))
+        par(mgp=c(2, 0.6, 0))
         ylim <- range(-0.5, 0.5, range(M.before[,i]), range(M.after[,i]))
 		    
         # MA-plot before normalization
-        plot(A[,i], M.before[,i], ylim=ylim, xlab="A", ylab="M", pch='.', col="black")
+        plot(data.A[, i], M.before[, i], ylim=ylim, xlab="A", ylab="M", pch='.', col="black")
         title(paste(sampleNames(cghCall.after)[i], "- Before normalization"), line=0.6)
         abline(h=0, col="orange", lty="dashed")
 		    
         # MA-plot after normalization
-        plot(A[,i], M.after[,i], ylim=ylim, xlab="A", ylab="M", pch='.', col=calls[,i]+2)
+        plot(data.A[, i], M.after[, i], ylim=ylim, xlab="A", ylab="M", pch='.', col=calls[,i]+2)
         title(paste(sampleNames(cghCall.after)[i], "- After normalization"), line=0.6)
         location <- ifelse(ylim[2] + ylim[1] > -0.4, "topright", "bottomright")
         legend(location, legend=legend, col=c(3,2,1), pch=20, cex=0.8, inset=0.02) 

@@ -1,29 +1,32 @@
 CGHnormaliter <-
-function (data, nchrom=24, stop_threshold=0.01, max_iterations=5, plotMA=TRUE) {
+function (data, nchrom = 24, cellularity = 1, max.losses = 0.3,
+          stop.threshold = 0.01, max.iterations = 5, plot.MA=TRUE) {
     # Read the raw intensity data and preprocess
-    data.raw <- .cghRaw_read(data)
+    data.raw <- .readCghRaw(data)
     invisible(capture.output(data.prep <- preprocess(data.raw, nchrom=nchrom)))
 
     # Convert into log2 ratios (M) and average intensities (A)
-    data.ma <- .cghRaw_ma(data.prep)
+    data.ma <- .calculateMA(data.prep)
 
     # Perform the iteration
-    result <- .iterate_normalize_call(data.ma, stop_threshold, max_iterations, plotMA)
+    result <- .runCGHnormaliter(data.ma, cellularity, max.losses,
+                                stop.threshold, max.iterations, plot.MA)
     
     # Return a cghCall object with the normalized log2 ratios, as
     # well as the inferred segmentations and calls
     result
 }
 
+
 CGHnormaliter.write.table <-
-function (input, data.type=c("normalized","segmented","called"),
-                           file=paste(data.type,".txt", sep="")) {
+function (input, data.type = c("normalized", "segmented", "called"),
+          file = paste(data.type,".txt", sep="")) {
     # First do a type check
     if (class(input) != "cghCall") {
         stop("Input should be an object of type cghCall.")
     }
     
-    # Obtain wanted data from input
+    # Extract proper data from input
     data.type <- match.arg(data.type)
     if (data.type == "normalized") {
         data <- copynumber(input)
@@ -45,7 +48,7 @@ function (input, data.type=c("normalized","segmented","called"),
     write.table(file=file, data, sep="\t", quote=F, row.names=F)
 }
 
-# Calculate intensities back from ratio
+# Calculate intensities back from log2 ratios
 # intensity.ratio = 2 ^ copynumber(result)
 # int1 = sqrt(2 ^ data.prep$A) / sqrt(intensity.ratio)
 # int2 = int1 * intensity.ratio

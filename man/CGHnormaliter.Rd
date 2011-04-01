@@ -10,19 +10,22 @@
 }
 
 \usage{
-  CGHnormaliter(data, nchrom = 24, stop_threshold = 0.01, max_iterations = 5, plotMA = TRUE)
+  CGHnormaliter(data, nchrom = 24, cellularity = 1, baselevel = 0, stop.threshold = 0.01, max.iterations = 5, plotMA = TRUE)
 }
 
 \arguments{
   \item{data}{either a dataframe or character string containing a filename. See section Details for the format.}
   \item{nchrom}{number of chromosomes.}
-  \item{stop_threshold}{threshold value for the mean difference between the LOWESS regression curves from two consecutive iterations. The iteration is terminated if this difference is below the \code{stop_threshold} for all samples.}
-  \item{max_iterations}{maximum number of iterations.}
+  \item{cellularity}{vector of cellularities ranging from 0 to 1 to define the contamination of your sample with healthy cells (1 = no contamination). See details for more information.}
+  \item{max.losses}{maximum fraction of losses in your samples. If this fraction is exceeded, losses are considerd normals.}
+  \item{stop.threshold}{threshold value for the mean difference between the LOWESS regression curves from two consecutive iterations. The iteration is terminated if this difference is below the \code{stop.threshold} for all samples.}
+  \item{max.iterations}{maximum number of iterations.}
    \item{plotMA}{logical. If \sQuote{plotMA = TRUE}, MA-plots before and after normalization are generated of each sample. The plots are saved into a PDF file.}
 }
 
 \details{
-  The input should be either a \code{data.frame} or the file name of a tabseparated text file (text files must contain a header). The first four columns should contain the name, chromosome and the start and end position in bp for each array target respectively. The position columns must contain numbers only. Following these are two columns with the raw test and reference intensities for each of your samples. These intensities must be numeric as well. If the input type is a text file, missing values should be represented as 'NA' or an empty field. There is a \code{CGHnormaliter.write.table} method that prints the results in a tabular format.
+  The input should be either a \code{data.frame} or the file name of a tabseparated text file (text files must contain a header). The first four columns should contain the name, chromosome and the start and end position in bp for each array target respectively. The position columns must contain numbers only. Following these are two columns with the raw test and reference intensities for each of your samples. These intensities must be numeric as well. If the input type is a text file, missing values should be represented as 'NA' or an empty field. There is a \code{CGHnormaliter.write.table} method that prints the results in a tabular format.\n
+  The cellularity and baselevel parameters should both be a vector of length \code{n} where \code{n} is the number of samples in your dataset. Each vector is recycled if there are not enough values in it, or truncated if there are too many.
 }
 
 \value{
