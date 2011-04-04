@@ -16,7 +16,7 @@ CGHnormaliterPackage <- packageDescription("CGHnormaliter")
 
 \title{CGHnormaliter Package (Version \Sexpr{CGHnormaliterPackage$Version})} 
 
-\author{Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling}
+\author{Bart P.P. van Houte, Thomas W. Binsl, Hannes Hettling}
 \maketitle 
 
 \section{Introduction}
@@ -90,7 +90,7 @@ data(Leukemia)
 \noindent Next, we run the CGHnormaliter routine on the first three
 chromosomes of the \begin{tt}Leukemia\end{tt} data:
 <<runCGHnormaliter>>=
-result <- CGHnormaliter(Leukemia, nchrom=3)
+result <- CGHnormaliter(Leukemia, nchrom=3, cellularity=0.9)
 @
 
 \vspace{0.5cm}
@@ -115,12 +115,33 @@ normalization. Note that the normalization is based on the normals only
 \noindent Now, several fields of the \begin{tt}result\end{tt} object can be
 acccessed, for example:
 <<accessResults>>=
-normalized.data <- copynumber(result)
+normalized.data <- copynumber(result)  # log2 ratios
 segmented.data <- segmented(result)
 called.data <- calls(result)
 @
 
 \vspace{0.5cm}
+Plotting the normalized log2 ratios in a density plot provides another
+means (besides MA plots) to inspect whether the centralization has been
+successful. Figure~\ref{fig:density-plot} shows such a density plot for
+sample 2:
+<<label=densityPlot, term=FALSE>>=
+plot(density(normalized.data[, 2]), col=1, main="Density plot - Sample 2")
+abline(v=0)
+@
+
+\begin{figure}
+\begin{center}
+<<label=callFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=HIDE>>=
+<<densityPlot>>
+@
+\end{center}
+\vspace*{-1.4cm}
+\caption{Density plot after CGHnormaliter normalization for the second leukemia
+sample.}
+\label{fig:calls-plot}
+\end{figure}
+
 The results can be visualized using the \begin{tt}plot\end{tt} function.
 In Figure~\ref{fig:calls-plot} we plot the results for the second sample
 in full resolution:

@@ -43,6 +43,10 @@ function (input) {
         chromosomes <- replace(chromosomes, chromosomes == 'Y', 24)
         input[, 2] <- as.integer(as.vector(chromosomes))
     }
+    
+    # Sort by chromosome number and then by start position
+    input <- input[order(input[, 2], input[, 3]), ]    
+    
     cghRaw(input)
 }
 
@@ -92,7 +96,8 @@ function (data.raw, cellularity, max.losses, stop.threshold, max.iterations, plo
     data.seg <- segmentData(data.nor)
     rm(data.nor)
     data.seg <- postsegnormalize(data.seg)
-    data.call <- .runCGHcall(data.seg)
+    cghcall.robustsig <- "no"
+    data.call <- .runCGHcall(data.seg, cghcall.robustsig)
     
     # Perform the iteration
     iteration <- 1
@@ -115,14 +120,16 @@ function (data.raw, cellularity, max.losses, stop.threshold, max.iterations, plo
         if (convergence) {
             cat("CGHnormaliter -- Reached convergence. ")
             cat("Running a final segmentation and calling...\n")
+	    cghcall.robustsig <- "yes"
         } else if (iteration >= max.iterations) {
             cat("CGHnormaliter -- Max iterations (",max.iterations,") reached. ", sep="")
             cat("Running a final segmentation and calling...\n")
+	    cghcall.robustsig <- "yes"
         }
         
         # Segment new data again and repeat the calling procedure
         data.seg <- segmentData(normalized$data)
-        data.call <- .runCGHcall(data.seg)
+        data.call <- .runCGHcall(data.seg, cghcall.robustsig)
 	
         # If abortion criterion reached, draw MA-plots and leave iteration
         if (convergence || iteration >= max.iterations) {
@@ -140,13 +147,13 @@ function (data.raw, cellularity, max.losses, stop.threshold, max.iterations, plo
 
 
 .runCGHcall <-
-function (data.seg) {
+function (data.seg, robustsig) {
     cat("Start data calling ..\n")
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
+        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig=robustsig)))
         invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
     } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
+        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig=robustsig)))
     } else {
         invisible(capture.output(data.call <- CGHcall(data.seg)))
     }
