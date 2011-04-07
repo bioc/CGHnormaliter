@@ -87,73 +87,14 @@ function (raw.data) {
 }
 
 
-.runCGHnormaliter <-
-function (data.raw, cellularity, max.losses, stop.threshold, max.iterations, plot.MA) {
-    # Perform an initial normalization, segmentation and calling
-    cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
-    invisible(capture.output(data.nor <-
-        normalize(data.raw$M, cellularity=cellularity, smoothOutliers=FALSE)))
-    data.seg <- segmentData(data.nor)
-    rm(data.nor)
-    data.seg <- postsegnormalize(data.seg)
-    cghcall.robustsig <- "no"
-    data.call <- .runCGHcall(data.seg, cghcall.robustsig)
-    
-    # Perform the iteration
-    iteration <- 1
-    repeat {
-        cat("CGHnormaliter -- Iteration #", iteration, "\n")
-
-        # Identify the normals and (re)normalize based to these normals
-        data.normals <- .extractNormals(data.call, data.raw$A, max.losses)
-        normalized <- .localLowess(data.call, data.raw$A, data.normals)
-    
-        # Print the mean normalization shift per sample
-        cat("Mean normalization shift per sample:\n")
-        samples <- sampleNames(data.raw$M)
-        for (i in 1:length(normalized$shift)) {
-            cat("  ", samples[i], ":", normalized$shift[i], "\n")
-        }
-        
-        # Print message if an abortion criterion is reached
-        convergence <- (sum(normalized$shift < stop.threshold) == length(normalized$shift))
-        if (convergence) {
-            cat("CGHnormaliter -- Reached convergence. ")
-            cat("Running a final segmentation and calling...\n")
-	    cghcall.robustsig <- "yes"
-        } else if (iteration >= max.iterations) {
-            cat("CGHnormaliter -- Max iterations (",max.iterations,") reached. ", sep="")
-            cat("Running a final segmentation and calling...\n")
-	    cghcall.robustsig <- "yes"
-        }
-        
-        # Segment new data again and repeat the calling procedure
-        data.seg <- segmentData(normalized$data)
-        data.call <- .runCGHcall(data.seg, cghcall.robustsig)
-	
-        # If abortion criterion reached, draw MA-plots and leave iteration
-        if (convergence || iteration >= max.iterations) {
-	    rm(data.seg, data.normals, normalized)
-            if (plot.MA) {
-                .plotMA(data.raw$A, copynumber(data.raw$M), data.call)
-            }
-            cat("CGHnormaliter -- FINISHED\n")
-            break
-        }
-        iteration <- iteration + 1
-    }
-    data.call
-}
-
-
 .runCGHcall <-
 function (data.seg, robustsig) {
     cat("Start data calling ..\n")
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig=robustsig)))
+        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
         invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
     } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig=robustsig)))
+        invisible(capture.output(data.call <- CGHcall(data.seg, robustsig="no")))
     } else {
         invisible(capture.output(data.call <- CGHcall(data.seg)))
     }

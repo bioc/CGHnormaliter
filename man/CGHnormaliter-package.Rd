@@ -14,15 +14,15 @@
   \tabular{ll}{
     Package: \tab CGHnormaliter\cr
     Type: \tab Package\cr
-    Version: \tab 1.3.8\cr
-    Date: \tab 2010-10-11\cr
+    Version: \tab 1.5.6\cr
+    Date: \tab 2011-04-06\cr
     License: \tab GPL (>= 3)\cr
   }
   The package contains two public functions. The function \code{CGHnormaliter} performs the iterative normalization of aCGH data, while the function \code{CGHnormaliter.write.table} prints normalized aCGH data to a file. See function documentation for details.
 }
 
 \author{
-  Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling
+  Bart P.P. van Houte, Thomas W. Binsl, Hannes Hettling
 }
 
 \references{

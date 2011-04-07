@@ -28,7 +28,7 @@
 }
 
 \author{
-  Thomas W. Binsl, Bart P.P. van Houte, Hannes Hettling
+  Bart P.P. van Houte, Thomas W. Binsl, Hannes Hettling
 }
 
 \references{

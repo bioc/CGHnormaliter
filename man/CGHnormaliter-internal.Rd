@@ -2,7 +2,6 @@
 \title{Internal CGHnormaliter functions}
 \alias{.readCghRaw}
 \alias{.calculateMA}
-\alias{.runCGHnormaliter}
 \alias{.runCGHcall}
 \alias{.extractNormals}
 \alias{.localLowess}
