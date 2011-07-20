@@ -88,15 +88,15 @@ function (raw.data) {
 
 
 .runCGHcall <-
-function (data.seg, robustsig) {
+function (data.seg, ...) {
     cat("Start data calling ..\n")
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no")))
+        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no", ...)))
         invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
     } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no")))
+        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no", ...)))
     } else {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all")))
+        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", ...)))
     }
     data.call
 }

@@ -10,7 +10,7 @@
 }
 
 \usage{
-  CGHnormaliter(data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE)
+  CGHnormaliter(data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE, ...)
 }
 
 \arguments{
@@ -19,6 +19,7 @@
   \item{cellularity}{vector of cellularities ranging from 0 to 1 to define the contamination of your sample with healthy cells (1 = no contamination). See Details for more information.}
   \item{max.losses}{maximum fraction of losses in your samples. In case this fraction is exceeded after calling, losses are deemed normals and centralization will be around the (lower) peak at the left of the log2 ratio distribution.}
   \item{plot.MA}{logical. If \sQuote{plot.MA = TRUE}, MA-plots before and after normalization are generated of each sample. The plots are saved into a PDF file.}
+  \item{...}{arguments for \code{DNAcopy} and/or \code{CGHcall}.}
 }
 
 \details{
@@ -53,7 +54,7 @@
   segmented.data <- segmented(result)
   called.data <- calls(result)
   ## Plot the normalization result of sample 2
-  plot(result[,2])
+  plot(result[, 2])
   ## Write the normalized log2 intensity ratios to file
   CGHnormaliter.write.table(result)
 }
