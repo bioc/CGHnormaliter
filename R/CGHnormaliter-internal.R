@@ -88,16 +88,15 @@ function (raw.data) {
 
 
 .runCGHcall <-
-function (data.seg, ...) {
+function (data.seg, extra.args) {
     cat("Start data calling ..\n")
-    formals(CGHcall) <- c(formals(CGHcall), alist(... = ))
     if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no", ...)))
+        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, prior="all", robustsig="no", extra.args))))
         invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
     } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", robustsig="no", ...)))
+        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, prior="all", robustsig="no", extra.args))))
     } else {
-        invisible(capture.output(data.call <- CGHcall(data.seg, prior="all", ...)))
+        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, prior="all", extra.args))))
     }
     data.call
 }

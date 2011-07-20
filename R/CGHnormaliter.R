@@ -2,6 +2,16 @@ CGHnormaliter <-
 function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ...) {
     max.iterations <- 5
 
+    # Extract proper arguments for segment (DNAcopy) and/or CGHcall
+    args.extra <- list(...)
+    args.segment <- args.extra[!is.na(pmatch(names(args.extra), names(formals(segment))))]
+    args.CGHcall <- args.extra[!is.na(pmatch(names(args.extra), names(formals(CGHcall))))]
+    args.extra[names(args.segment)] <- NULL
+    args.extra[names(args.CGHcall)] <- NULL
+    if (length(args.extra) > 0) {
+        warning("Unused argument(s): ", paste(unlist(names(args.extra)), collapse=", "))
+    }
+    
     # Read the raw intensity data and preprocess
     data.raw <- .readCghRaw(data)
     invisible(capture.output(data.prep <- preprocess(data.raw, nchrom=nchrom)))
@@ -16,11 +26,10 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
     invisible(capture.output(data.nor <-
         normalize(data.ma$M, cellularity=cellularity, smoothOutliers=FALSE)))
-    formals(segmentData) <- c(formals(segmentData), alist(... = ))
-    data.seg <- segmentData(data.nor, ...)
+    data.seg <- do.call("segmentData", c(data.nor, args.segment))
     rm(data.nor)
     data.seg <- postsegnormalize(data.seg)
-    data.call <- .runCGHcall(data.seg, ...)
+    data.call <- .runCGHcall(data.seg, args.CGHcall)
     
     # Perform the iteration
     for (iteration in 1:max.iterations) {
@@ -48,8 +57,9 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
         }
         
         # Repeat the segmentation and calling procedure
-        data.seg <- segmentData(normalized$data, ...)
-        data.call <- .runCGHcall(data.seg, ...)
+	
+        data.seg <- do.call("segmentData", c(normalized$data, args.segment))
+        data.call <- .runCGHcall(data.seg, args.CGHcall)
 	
 	# Stop iteration if convergence reached
 	if (convergence) {
