@@ -10,7 +10,7 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     args.extra[names(args.CGHcall)] <- NULL
     if (length(args.extra) > 0) {
         names.unused <- paste(unlist(names(args.extra)), collapse=", ")
-        warning("Unused argument(s): ", names.unused, immediate.=TRUE)
+        warning("unused argument(s): ", names.unused, immediate.=TRUE)
     }
     
     # Read the raw intensity data and preprocess
