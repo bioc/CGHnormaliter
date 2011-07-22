@@ -9,7 +9,8 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     args.extra[names(args.segment)] <- NULL
     args.extra[names(args.CGHcall)] <- NULL
     if (length(args.extra) > 0) {
-        warning("Unused argument(s): ", paste(unlist(names(args.extra)), collapse=", "))
+        names.unused <- paste(unlist(names(args.extra)), collapse=", ")
+        warning("Unused argument(s): ", names.unused, immediate.=TRUE)
     }
     
     # Read the raw intensity data and preprocess
@@ -109,7 +110,7 @@ function (input, data.type = c("normalized", "segmented", "called"),
     write.table(file=file, data, sep="\t", quote=F, row.names=F)
 }
 
-# Calculate intensities back from log2 ratios
+### How to calculate intensities back from log2 ratios ###
 # intensity.ratio = 2 ^ copynumber(result)
 # int1 = sqrt(2 ^ data.prep$A) / sqrt(intensity.ratio)
 # int2 = int1 * intensity.ratio
