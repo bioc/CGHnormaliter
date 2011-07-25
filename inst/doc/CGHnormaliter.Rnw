@@ -136,7 +136,7 @@ abline(v=0, lty=2)
 \begin{figure}
 \begin{center}
 \resizebox{8.5cm}{!}{
-<<label=densityPlotFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=HIDE>>=
+<<label=densityPlotFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=hide>>=
 <<densityPlotCommand>>
 @
 }
@@ -159,7 +159,7 @@ plot(result[,2], ylimit=c(-2,2), dotres=1)
 \begin{figure}
 \begin{center}
 \resizebox{8.5cm}{!}{
-<<label=callPlotFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=HIDE>>=
+<<label=callPlotFigure, fig=TRUE, eps=FALSE, echo=FALSE, results=hide>>=
 <<callPlotCommand>>
 @
 }
