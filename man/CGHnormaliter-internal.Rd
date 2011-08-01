@@ -3,7 +3,6 @@
 \alias{.readCghRaw}
 \alias{.calculateMA}
 \alias{.runCGHcall}
-\alias{.extractNormals}
 \alias{.localLowess}
 \alias{.plotMA}
 

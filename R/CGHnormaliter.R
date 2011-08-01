@@ -23,7 +23,6 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     rm(data.prep)
     
     # Initial normalization, segmentation and calling
-    formals()
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")
     invisible(capture.output(data.nor <-
         normalize(data.ma$M, cellularity=cellularity, smoothOutliers=FALSE)))
@@ -37,8 +36,7 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
         cat("CGHnormaliter -- Iteration #", iteration, "\n")
 
         # Identify the normals and (re)normalize based on these normals
-        data.normals <- .extractNormals(data.call, data.ma$A, max.losses)
-        normalized <- .localLowess(data.call, data.ma$A, data.normals)
+        normalized <- .localLowess(data.call, data.ma$A, max.losses)
     
         # Print the mean normalization shift per sample
         cat("Mean normalization shift per sample:\n")
@@ -70,7 +68,7 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     
     # Draw MA-plots, if asked for
     if (plot.MA) {
-        rm(data.seg, data.normals, normalized)
+        rm(data.seg, normalized)
         .plotMA(data.ma$A, copynumber(data.ma$M), data.call)
     }
     

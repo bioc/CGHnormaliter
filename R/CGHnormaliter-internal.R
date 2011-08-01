@@ -63,8 +63,8 @@ function (raw.data) {
     }    
 
     # Initialize matrix for log2 ratios (M) and average spot intensities (A)
-    data.M <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
-    data.A <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features,NULL))
+    data.M <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features, NULL))
+    data.A <- matrix(0, nrow=nrow(intensities), ncol=0, dimnames=list(features, NULL))
     colnames.M <- c()
     colnames.A <- c()
 
@@ -111,17 +111,16 @@ function (data.seg, extra.args) {
 }
 
     
-.extractNormals <-
+.localLowess <-
 function (data.call, data.A, max.losses) {
     calls <- calls(data.call)
     data.M <- copynumber(data.call)
-
-    # A list to store the extracted copy numbers
-    normals.M <- list()
-    normals.A <- list()
-
-    # Extract normals in each sample
+    
+    # Variable for normalization shift per sample
+    shift.mean <- c()
+    
     for (i in 1:ncol(data.M)) {
+        # Extract normals
         nr.losses <- sum(calls[, i] == -1, na.rm=TRUE)
         nr.total <- nrow(data.call)
         frac.losses <- nr.losses / nr.total
@@ -130,33 +129,20 @@ function (data.call, data.A, max.losses) {
         } else {  # Losses are considered normals
             index.normals <- which(calls[, i] == -1)
         }
-        normals.M[[i]] <- data.M[, i][index.normals]
-        normals.A[[i]] <- data.A[, i][index.normals]
-    }
-    list(M=normals.M, A=normals.A)
-}
+        normals.M <- data.M[index.normals, i]
+        normals.A <- data.A[index.normals, i]
 
-
-.localLowess <-
-function (data.call, data.A, normals) {
-    data.M <- copynumber(data.call)
-    
-    # Variable for normalization shift per sample
-    shift.mean <- c()
-
-    # Apply LOWESS in each sample
-    for (i in 1:length(normals$M)) {
-        # Make sure that the min and max value for A are also included in the
-        # LOWESS regression, otherwise predictions for M might lead to NA's
-        min.A <- range(data.A[, i])[1]
-        max.A <- range(data.A[, i])[2]
-        min.M <- data.M[which(data.A == min.A)][1]
-        max.M <- data.M[which(data.A == max.A)][1]
-        normals$A[[i]] <- c(normals$A[[i]], min.A, max.A)
-        normals$M[[i]] <- c(normals$M[[i]], min.M, max.M)
+        # Also include min and max values of A in the LOWESS
+	# regression, otherwise predictions for M can yield NA's
+        min.A <- min(data.A[, i])
+        max.A <- max(data.A[, i])
+        min.M <- data.M[which(data.A[, i] == min.A), i][1]
+        max.M <- data.M[which(data.A[, i] == max.A), i][1]
+        normals.A <- c(normals.A, min.A, max.A)
+        normals.M <- c(normals.M, min.M, max.M)
 
         # Apply LOWESS regression based on the normals only
-        regression <- loess(M ~ A, data.frame(A=normals$A[[i]], M=normals$M[[i]]), span=0.2)
+        regression <- loess(M ~ A, data.frame(A=normals.A, M=normals.M), span=0.2)
         
         # Compute the normalization values for the whole sample
         normalization.values <- predict(regression, data.frame(A=data.A[, i]))
@@ -166,11 +152,9 @@ function (data.call, data.A, normals) {
         data.M[, i] <- data.M[, i] - normalization.values
     }
     
-    # Create a new environment to store the renormalized data in
+    # Store the renormalized data in a new cghCall object
     newAssayData <- new.env(parent=data.call@assayData)
     assign("copynumber", data.M, envir=newAssayData)
-
-    # Store the new environment in the return object
     data.normalized <- data.call
     data.normalized@assayData <- newAssayData
 
