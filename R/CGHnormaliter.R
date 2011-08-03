@@ -1,5 +1,5 @@
 CGHnormaliter <-
-function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ...) {
+function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE, ...) {
     max.iterations <- 5
 
     # Extract proper arguments for segment (DNAcopy) and/or CGHcall
@@ -34,11 +34,9 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     # Perform the iteration
     for (iteration in 1:max.iterations) {
         cat("CGHnormaliter -- Iteration #", iteration, "\n")
-
-        # Identify the normals and (re)normalize based on these normals
+	
+	# LOWESS based on normals only
         normalized <- .localLowess(data.call, data.ma$A, max.losses)
-    
-        # Print the mean normalization shift per sample
         cat("Mean normalization shift per sample:\n")
         samples <- sampleNames(data.ma$M)
         for (i in 1:length(normalized$shift)) {
@@ -55,12 +53,10 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
             cat("Running a final segmentation and calling...\n")
         }
         
-        # Repeat the segmentation and calling procedure
-	
+	# Redo segmentation and calling
         data.seg <- do.call("segmentData", c(normalized$data, args.segment))
         data.call <- .runCGHcall(data.seg, args.CGHcall)
 	
-	# Stop iteration if convergence reached
 	if (convergence) {
 	    break;
 	}
@@ -75,7 +71,6 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA=TRUE, ..
     cat("CGHnormaliter -- FINISHED\n")
     data.call
 }
-
 
 
 CGHnormaliter.write.table <-
