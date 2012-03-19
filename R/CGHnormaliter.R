@@ -1,7 +1,7 @@
 CGHnormaliter <-
 function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE, ...) {
     max.iterations <- 5
-
+    
     # Extract proper arguments for segment (DNAcopy) and/or CGHcall
     args.extra <- list(...)
     args.segment <- args.extra[!is.na(pmatch(names(args.extra), names(formals(segment))))]
@@ -21,6 +21,13 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE, 
     # Convert intensities into log2 ratios (M) and average intensities (A)
     data.ma <- .calculateMA(data.prep)
     rm(data.prep)
+    
+    # Expand or reduce size of 'max.losses' to number of samples
+    if (sum(max.losses < 0 || max.losses > 1) > 0) {
+        warning("Some vales of max.losses are outside range [0,1]", immediate.=TRUE)
+    }
+    if (length(max.losses) < ncol(data.ma$M)) max.losses <- rep(max.losses, ncol(data.ma$M));
+    if (length(max.losses) > ncol(data.ma$M)) max.losses <- max.losses[1:ncol(data.ma$M)];    
     
     # Initial normalization, segmentation and calling
     cat("\nCGHnormaliter -- Running an initial segmentation and calling\n")

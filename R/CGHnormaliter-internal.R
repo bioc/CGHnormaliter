@@ -124,7 +124,7 @@ function (data.call, data.A, max.losses) {
         nr.losses <- sum(calls[, i] == -1, na.rm=TRUE)
         nr.total <- nrow(data.call)
         frac.losses <- nr.losses / nr.total
-        if (frac.losses <= max.losses) {
+        if (frac.losses <= max.losses[i]) {
             index.normals <- which(calls[, i] == 0)
         } else {  # Losses are considered normals
             index.normals <- which(calls[, i] == -1)
