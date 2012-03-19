@@ -24,7 +24,7 @@ function (data, nchrom = 24, cellularity = 1, max.losses = 0.3, plot.MA = TRUE, 
     
     # Expand or reduce size of 'max.losses' to number of samples
     if (sum(max.losses < 0 || max.losses > 1) > 0) {
-        warning("Some vales of max.losses are outside range [0,1]", immediate.=TRUE)
+        warning("Some values of max.losses are outside range [0,1]", immediate.=TRUE)
     }
     if (length(max.losses) < ncol(data.ma$M)) max.losses <- rep(max.losses, ncol(data.ma$M));
     if (length(max.losses) > ncol(data.ma$M)) max.losses <- max.losses[1:ncol(data.ma$M)];    
