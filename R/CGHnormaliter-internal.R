@@ -47,7 +47,7 @@ function (input) {
     # Sort by chromosome number and then by start position
     input <- input[order(input[, 2], input[, 3]), ]    
     
-    cghRaw(input)
+    make_cghRaw(input)
 }
 
 
@@ -93,20 +93,12 @@ function (data.seg, extra.args) {
     if (!"prior" %in% names(extra.args)) {
         extra.args$prior = "all";  # default in CGHnormaliter
     }
-    if (compareVersion(package.version("CGHcall"), "2.9.2") >= 0) {
-        if (!"robustsig" %in% names(extra.args)) {
-            extra.args$robustsig = "no";  # default in CGHnormaliter
-        }
-        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, extra.args))))
-        invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
-    } else if (compareVersion(package.version("CGHcall"), "2.6.0") >= 0) {
-        if (!"robustsig" %in% names(extra.args)) {
-            extra.args$robustsig = "no";  # default in CGHnormaliter
-        }
-        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, extra.args))))
-    } else {
-        invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, extra.args))))
+    if (!"robustsig" %in% names(extra.args)) {
+        extra.args$robustsig = "no";  # default in CGHnormaliter
     }
+    invisible(capture.output(data.call <- do.call("CGHcall", c(data.seg, extra.args))))
+    invisible(capture.output(data.call <- ExpandCGHcall(data.call, data.seg)))
+    
     data.call
 }
 
